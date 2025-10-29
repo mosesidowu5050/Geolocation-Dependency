@@ -1,4 +1,4 @@
-package org.mosesidowu.geolocation_core.service;
+package org.mosesidowu.geolocation_core.service.googleService;
 
 import org.mosesidowu.geolocation_core.dto.request.AddressRequest;
 import org.mosesidowu.geolocation_core.dto.response.AddressValidationResponse;

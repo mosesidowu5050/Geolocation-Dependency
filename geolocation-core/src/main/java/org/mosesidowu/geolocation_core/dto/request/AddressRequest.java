@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class AddressRequest {
 
+    private String userId;
     private String address;
     private String countryCode;
 }

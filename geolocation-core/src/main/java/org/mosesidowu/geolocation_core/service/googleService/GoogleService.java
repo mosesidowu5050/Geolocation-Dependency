@@ -1,15 +1,18 @@
-package org.mosesidowu.geolocation_core.service;
+package org.mosesidowu.geolocation_core.service.googleService;
 
+import lombok.RequiredArgsConstructor;
 import org.mosesidowu.geolocation_core.dto.request.AddressRequest;
 import org.mosesidowu.geolocation_core.dto.response.AddressValidationResponse;
 import org.mosesidowu.geolocation_core.dto.response.CoordinatesResponse;
 import org.mosesidowu.geolocation_core.dto.response.NearbyPlaceResponse;
+import org.mosesidowu.geolocation_core.service.rateLimiterService.RateLimiterService;
 import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -20,33 +23,38 @@ import java.util.List;
 public class GoogleService implements GoogleServiceInterface {
 
     private final RestTemplate restTemplate;
+    private final RateLimiterService rateLimiterService;
+
     @Value("${google.maps.api.key}")
     private String googleMapsApiKey;
 
     private static final String GOOGLE_GEOCODING_API_BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     private static final String GOOGLE_PLACE_API_BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 
-    public GoogleService(RestTemplate restTemplate) {
+    public GoogleService(RestTemplate restTemplate, RateLimiterService rateLimiterService) {
         this.restTemplate = restTemplate;
+        this.rateLimiterService = rateLimiterService;
     }
 
 
     @Override
     @Cacheable(value = "addressValidationCache", key = "#addressRequest.address + '_' + #addressRequest.countryCode")
     public AddressValidationResponse validateAndGeocodeAddress(AddressRequest addressRequest) {
+        rateLimiterService.consumeToken(addressRequest.getUserId());
+
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(GOOGLE_GEOCODING_API_BASE_URL)
                 .queryParam("address", addressRequest.getAddress())
                 .queryParam("key", googleMapsApiKey);
 
-        if (addressRequest.getCountryCode() != null && !addressRequest.getCountryCode().isEmpty()) {
+        if (addressRequest.getCountryCode() != null && !addressRequest.getCountryCode().isEmpty())
             uriBuilder.queryParam("components", "country:" + addressRequest.getCountryCode());
-        }
 
         ResponseEntity<JsonNode> responseEntity = restTemplate.getForEntity(uriBuilder.toUriString(), JsonNode.class);
         JsonNode root = responseEntity.getBody();
 
         return parseGeocodingResponseForValidation(addressRequest.getAddress(), root);
     }
+
 
     @Override
     @Cacheable(value = "coordinatesCache", key = "#address")
@@ -71,9 +79,8 @@ public class GoogleService implements GoogleServiceInterface {
                 .queryParam("radius", radius)
                 .queryParam("key", googleMapsApiKey);
 
-        if (type != null && !type.isEmpty()) {
+        if (type != null && !type.isEmpty())
             uriBuilder.queryParam("type", type);
-        }
 
         ResponseEntity<JsonNode> responseEntity = restTemplate.getForEntity(uriBuilder.toUriString(), JsonNode.class);
         JsonNode root = responseEntity.getBody();
