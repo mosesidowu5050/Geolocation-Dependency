@@ -4,7 +4,9 @@ package org.mosesidowu.geolocation_api_service.controller;
 import org.mosesidowu.geolocation_core.dto.request.AddressRequest;
 import org.mosesidowu.geolocation_core.dto.response.AddressValidationResponse;
 import org.mosesidowu.geolocation_core.dto.response.CoordinatesResponse;
-import org.mosesidowu.geolocation_core.service.GoogleMapsService;
+import org.mosesidowu.geolocation_core.dto.response.NearbyPlaceResponse;
+import org.mosesidowu.geolocation_core.service.GoogleService;
+import org.mosesidowu.geolocation_core.service.GoogleServiceInterface;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +15,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/geolocation")
 public class GeolocationController {
 
-    private final GoogleMapsService googleMapsService;
+    private final GoogleServiceInterface googleServiceInterface;
 
-    public GeolocationController(GoogleMapsService googleMapsService) {
-        this.googleMapsService = googleMapsService;
+    public GeolocationController(GoogleService googleMapsService) {
+        this.googleServiceInterface = googleMapsService;
     }
 
     @PostMapping("/validate-address")
@@ -30,7 +32,7 @@ public class GeolocationController {
                             .build(),
                     HttpStatus.BAD_REQUEST);
         }
-        AddressValidationResponse response = googleMapsService.validateAndGeocodeAddress(request);
+        AddressValidationResponse response = googleServiceInterface.validateAndGeocodeAddress(request);
         return ResponseEntity.ok(response);
     }
 
@@ -44,7 +46,34 @@ public class GeolocationController {
                             .build(),
                     HttpStatus.BAD_REQUEST);
         }
-        CoordinatesResponse response = googleMapsService.getCoordinates(address);
+        CoordinatesResponse response = googleServiceInterface.getCoordinates(address);
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/nearby/address")
+    public ResponseEntity<?> getNearbyPlacesByAddress(
+            @RequestParam String address,
+            @RequestParam(defaultValue = "1500") int radius,
+            @RequestParam(required = false) String type) {
+
+        CoordinatesResponse coordinates = googleServiceInterface.getCoordinates(address);
+
+        if (coordinates.getLatitude() != null && coordinates.getLongitude() != null) {
+            NearbyPlaceResponse response = googleServiceInterface.findNearbyPlaces(
+                    Double.parseDouble(coordinates.getLatitude()),
+                    Double.parseDouble(coordinates.getLongitude()),
+                    radius,
+                    type
+            );
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(
+                NearbyPlaceResponse.builder()
+                        .status("ERROR")
+                        .message("Invalid or unrecognized address.")
+                        .build()
+        );
     }
 }

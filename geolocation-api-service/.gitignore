@@ -1,0 +1,2 @@
+# Ignore local application config
+src/main/resources/secrets.properties
