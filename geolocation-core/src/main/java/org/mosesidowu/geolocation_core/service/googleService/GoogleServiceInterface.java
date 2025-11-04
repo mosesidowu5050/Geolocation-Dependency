@@ -6,7 +6,6 @@ import org.mosesidowu.geolocation_core.dto.response.CoordinatesResponse;
 import org.mosesidowu.geolocation_core.dto.response.NearbyPlaceResponse;
 import org.springframework.stereotype.Component;
 
-@Component
 public interface GoogleServiceInterface {
 
     AddressValidationResponse validateAndGeocodeAddress(AddressRequest addressRequest);

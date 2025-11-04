@@ -1,5 +1,6 @@
 package org.mosesidowu.geolocation_core.service.googleService;
 
+import lombok.RequiredArgsConstructor;
 import org.mosesidowu.geolocation_core.dto.request.AddressRequest;
 import org.mosesidowu.geolocation_core.dto.response.AddressValidationResponse;
 import org.mosesidowu.geolocation_core.dto.response.CoordinatesResponse;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GoogleService implements GoogleServiceInterface {
 
     private final RestTemplate restTemplate;
@@ -29,10 +31,6 @@ public class GoogleService implements GoogleServiceInterface {
     private static final String GOOGLE_GEOCODING_API_BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
     private static final String GOOGLE_PLACE_API_BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 
-    public GoogleService(RestTemplate restTemplate, RateLimiterService rateLimiterService) {
-        this.restTemplate = restTemplate;
-        this.rateLimiterService = rateLimiterService;
-    }
 
 
     @Override
