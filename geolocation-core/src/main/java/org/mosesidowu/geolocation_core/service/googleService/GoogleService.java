@@ -1,6 +1,5 @@
 package org.mosesidowu.geolocation_core.service.googleService;
 
-import lombok.RequiredArgsConstructor;
 import org.mosesidowu.geolocation_core.dto.request.AddressRequest;
 import org.mosesidowu.geolocation_core.dto.response.AddressValidationResponse;
 import org.mosesidowu.geolocation_core.dto.response.CoordinatesResponse;
@@ -12,7 +11,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -195,3 +193,4 @@ public class GoogleService implements GoogleServiceInterface {
         return response;
     }
 }
+
