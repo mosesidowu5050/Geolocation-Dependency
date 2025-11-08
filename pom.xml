@@ -58,6 +58,15 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/mosesidowu5050/Geolocation-Dependency</url>
+        </repository>
+    </distributionManagement>
+
+
     <build>
         <pluginManagement>
             <plugins>
